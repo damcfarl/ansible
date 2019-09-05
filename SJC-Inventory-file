@@ -1,0 +1,5 @@
+[apics]
+apic1 ansible_host=10.122.143.36
+
+[vcenter]
+vcenter1

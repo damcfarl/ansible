@@ -1,0 +1,191 @@
+---
+- name: Make Tenant ATX-Ansible1
+  hosts: apic1
+  connection: local
+  gather_facts:  false
+  user: damcfarl
+
+
+  vars_files:
+    - external_varsATX.yml
+
+  tasks:
+    - name:  Creating Tenant
+      aci_tenant:
+        tenant: "{{  tenant_name  }}"
+        description: "ATX-Ansible1 Tenant"
+        host:  "{{ host }}"
+        username: "{{ user }}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs  }}"
+        state: present
+
+
+    - name: Creating VRF
+      aci_vrf:
+        tenant: "{{tenant_name}}"
+        vrf_name: "{{vrf_name}}"
+        host: "{{host}}"
+        username: "{{user}}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs  }}"
+        state: present
+
+
+    - name: Creating BD
+      aci_bd:
+        host: "{{host}}"
+        username: "{{user}}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs  }}"
+        tenant: "{{tenant_name}}"
+        vrf_name: "{{vrf_name}}"
+        bd: "{{bdname}}"
+        state: present
+
+    - name: Create a subnet
+      aci_bd_subnet:
+        host: "{{host}}"
+        username: "{{user}}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs  }}"
+        tenant: "{{tenant_name}}"
+        bd: "{{bd.name}}"
+        gateway: "{{bd.ip}}"
+        mask: "{{bd.mask}}"
+        state: present
+
+    - name: Create AP
+      aci_ap:
+        app_profile_name: "{{app_profile_name}}"
+        tenant: "{{tenant_name}}"
+        host: "{{host}}"
+        username: "{{user}}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs  }}"
+
+    - name: Create web_epg
+      aci_epg:
+        tenant: "{{tenant_name}}"
+        app_profile_name: "{{app_profile_name}}"
+        epg_name:  "{{epg_name1}}"
+        bd_name: "{{bd.name}}"
+        host: "{{host}}"
+        username: "{{user}}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs  }}"
+        state: present
+
+    - name: Create web_epg contract
+      aci_epg_to_contract:
+        tenant: "{{tenant_name}}"
+        app_profile_name: "{{app_profile_name}}"
+        epg_name:  "{{epg_name1}}"
+        contract:  "{{contract_name}}"
+        contract_type: provider
+        host: "{{host}}"
+        username: "{{user}}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs  }}"
+
+    - name: Create db_epg
+      aci_epg:
+        tenant: "{{tenant_name}}"
+        app_profile_name: "{{app_profile_name}}"
+        epg_name:  "{{epg_name2}}"
+        bd_name: "{{bd.name}}"
+        host: "{{host}}"
+        username: "{{user}}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs  }}"
+        state: present
+
+    - name: Create web_epg contract
+      aci_epg_to_contract:
+        tenant: "{{tenant_name}}"
+        app_profile_name: "{{app_profile_name}}"
+        epg_name:  "{{epg_name2}}"
+        contract:  "{{contract_name}}"
+        contract_type: provider
+        host: "{{host}}"
+        username: "{{user}}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs  }}"
+
+    - name: Create a Filter
+      aci_filter:
+        filter_name:  "{{filter_name}}"
+        tenant: "{{tenant_name}}"
+        host: "{{host}}"
+        username: "{{user}}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs  }}"
+
+    - name: Create Filter Entry
+      aci_filter_entry:
+        filter_name:  "{{filter_name}}"
+        filter_entry: "{{entry_name}}"
+        tenant: "{{tenant_name}}"
+        ether_type: unspecified
+        host: "{{host}}"
+        username: "{{user}}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs  }}"
+        state: present
+
+    - name:  Create a Tenant Contract
+      aci_contract:
+        tenant: "{{tenant_name}}"
+        contract_name: "{{contract_name}}"
+        scope: tenant
+        host: "{{host}}"
+        username: "{{user}}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs  }}"
+
+    - name:  Create Contract Subjects
+      aci_contract_subject:
+        subject_name: "{{subject_name}}"
+        contract_name: "{{contract_name}}"
+        tenant: "{{tenant_name}}"
+        reverse_filter: yes
+        host: "{{host}}"
+        username: "{{user}}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs  }}"
+
+    - name:  Bind Subject to filter
+      aci_contract_subject_to_filter:
+        subject_name: "{{subject_name}}"
+        contract_name: "{{contract_name}}"
+        tenant: "{{tenant_name}}"
+        filter_name:  "{{filter_name}}"
+        host: "{{host}}"
+        username: "{{user}}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs  }}"
+
+    - name:  VMM Binding to EPGs
+      aci_epg_to_domain:
+        app_profile_name:  "{{app_profile_name}}"
+        tenant: "{{tenant_name}}"
+        epg_name: "{{item}}"
+        domain_type:  vmm
+        vm_provider:  vmware
+        domain_profile: "{{vmm_domain}}"
+        deploy_immediacy: immediate
+        host: "{{host}}"
+        username: "{{user}}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs  }}"
+
+      with_items:
+          - "{{epg_name1}}"
+          - "{{epg_name2}}"
+
+# Modified by damcfarl
+#
+# Usage:  ansible-playbook PB-UserCred-CreateTenant.yml -i SJC-Inventory-file  -vvv
+#
+#  docs.ansible.com is essential to make sure you got the modules right
+# variables are defined in external_varsATX.yml
