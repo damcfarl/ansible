@@ -1,0 +1,28 @@
+---
+- name: Query Tenants ATX-Ansible1
+  hosts: apic1
+  connection: local
+  gather_facts:  false
+
+
+  vars_files:
+    - external_varsATX.yml
+
+  tasks:
+    - name:  Query all Tenants
+      aci_tenant:
+#       tenant:  "{{  tenant_name  }}"
+        description: "ATX-Ansible1 Tenant"
+        host:  "{{ host }}"
+        username: "{{ user }}"
+        private_key:  "{{ private_key }}"
+        certificate_name: "{{ certificate_name }}"
+        validate_certs: "{{ validate_certs  }}"
+        state: query
+
+# Created by Zalatan
+#
+# Usage: sudo ansible-playbook PB-QueryTenants.yml -i SJC-Inventory-file -vvv | grep "dn"
+#
+# docs.ansible.com is essential to make sure you have the modules correctly identified
+# variables are defined in external_varsATX.yml
