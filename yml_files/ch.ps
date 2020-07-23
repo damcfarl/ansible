@@ -1,0 +1,7 @@
+
+for file in `ls`
+do
+  echo $file
+  dos2unix < $file > $$.out
+  mv $$.out $file
+done

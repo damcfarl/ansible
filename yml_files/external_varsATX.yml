@@ -1,0 +1,31 @@
+---
+action: post
+user:  admin
+password: "C1sco12345!"
+protocol: https
+validate_certs:  no
+##host:  198.19.202.94
+host:  apic1
+
+
+tenant_name: ATX-Ansible1
+vrf_name: vrf_A
+bdname: bd_A
+bd:
+    name:  bd_A
+    ip:  10.10.5.1/24
+    mask: 24
+
+app_profile_name: app1
+contract_name: Contract1
+filter_name:  Contract1_filter
+entry_name:  Filter1_entry
+subject_name: Subject1
+epg_name1: web_epg
+epg_name2: db_epg
+vmm_domain: Pod1_VDS
+#private_key: ./xxx.key
+#certificate_name: ansible-xxx
+
+
+# These are the Variables and values that are used by PB_CreateTenantATX.yml and PB-DeleteTenantATX.yml
